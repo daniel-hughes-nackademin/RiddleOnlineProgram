@@ -7,38 +7,35 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
+public class Server implements Runnable {
 
-   public void runServer() {
-           System.out.println("Server is running. Awaiting client connection.");
-       int portNr = 41414;
-       try(
-               ServerSocket serverSocket = new ServerSocket(portNr);
-               Socket socketToClient = serverSocket.accept();
-               PrintWriter writer = new PrintWriter(socketToClient.getOutputStream(), true);
-               BufferedReader reader = new BufferedReader(new InputStreamReader(socketToClient.getInputStream()))
-               ){
-           String clientName = socketToClient.getRemoteSocketAddress().toString();
-           System.out.println(clientName + " connected to Server.");
-           System.out.println("Telling very lame riddles to client.");
+    Socket socketToClient;
+    Thread thread;
 
-           String output, input;
+    public Server(Socket socketToClient){
+        this.socketToClient = socketToClient;
+        thread = new Thread(this);
+        thread.start();
+    }
 
-           Protocol protocol = new Protocol();
-           output = protocol.processInput(null);
-           writer.println(output);
-           while ((input = reader.readLine()) != null){
-               output = protocol.processInput(input);
-               writer.println(output);
-           }
-       } catch (IOException e){
-           e.printStackTrace();
-       }
+    @Override
+    public void run() {
+        try (
+                PrintWriter writer = new PrintWriter(socketToClient.getOutputStream(), true);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socketToClient.getInputStream()))
+        ) {
+            String output, input;
 
-   }
+            Protocol protocol = new Protocol();
+            output = protocol.processInput(null);
+            writer.println(output);
+            while ((input = reader.readLine()) != null) {
+                output = protocol.processInput(input);
+                writer.println(output);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-
-    public static void main(String[] args) {
-        new Server().runServer();
     }
 }
