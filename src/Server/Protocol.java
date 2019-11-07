@@ -43,7 +43,7 @@ public class Protocol {
                 break;
             case SENT_RIDDLE:
                 if(input.equalsIgnoreCase(answers[currentRiddle])){
-                    output = "That is correct! Want another joke?";
+                    output = "That is correct! Want another riddle?";
                     currentRiddle++;
                     if(currentRiddle == riddles.length)
                         currentRiddle = 0;
